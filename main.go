@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
@@ -42,11 +43,12 @@ type Data struct {
 			Username  string `json:"username"`
 			Type      string `json:"type"`
 		} `json:"chat"`
-		Photo []PhotoSize
-		Date  int    `json:"date"`
-		Text  string `json:"text"`
+		Photo []PhotoSize `json:"photo"`
+		Date  int         `json:"date"`
+		Text  string      `json:"text"`
 	} `json:"message"`
 }
+
 func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	if req.HTTPMethod != "POST" {
@@ -70,9 +72,18 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 
 	}
 
+	log.Println(data)
+
 	if strings.Contains(data.Message.Text, "start") {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 204,
+		}, nil
+	}
+
+	if data.Message.Photo != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 200,
+			Body:       "Image detected! " + data.Message.Photo[0].FileID,
 		}, nil
 	}
 
@@ -93,7 +104,10 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 
 	}
 
-	if request, err := http.NewRequest("POST", fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", TELEGRAM_BOT_TOKEN), bytes.NewReader(responseDataJSON)); err != nil {
+	if request, err := http.NewRequest(
+		"POST",
+		fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", TELEGRAM_BOT_TOKEN),
+		bytes.NewReader(responseDataJSON)); err != nil {
 
 		log.Println(err)
 
@@ -108,15 +122,11 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		client := &http.Client{}
 
 		if _, err = client.Do(request); err != nil {
-
 			log.Println(err)
-
 			return events.APIGatewayProxyResponse{
 				StatusCode: 503,
 			}, nil
-
 		}
-
 	}
 
 	return events.APIGatewayProxyResponse{
@@ -126,7 +136,7 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 }
 
 func main() {
-	detectText()
+	// detectText()
 	lambda.Start(handler)
 }
 
