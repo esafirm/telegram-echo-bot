@@ -2,17 +2,28 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
+
+	vision "cloud.google.com/go/vision/apiv1"
+	"google.golang.org/api/option"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
 var TELEGRAM_BOT_TOKEN string
+
+type PhotoSize struct {
+	FileID string `json:"file_id"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
+}
 
 type Data struct {
 	UpdateID int `json:"update_id"`
@@ -31,11 +42,11 @@ type Data struct {
 			Username  string `json:"username"`
 			Type      string `json:"type"`
 		} `json:"chat"`
-		Date int    `json:"date"`
-		Text string `json:"text"`
+		Photo []PhotoSize
+		Date  int    `json:"date"`
+		Text  string `json:"text"`
 	} `json:"message"`
 }
-
 func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	if req.HTTPMethod != "POST" {
@@ -115,5 +126,78 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 }
 
 func main() {
+	detectText()
 	lambda.Start(handler)
+}
+
+func detectText() error {
+	file := "./gojek.png"
+
+	ctx := context.Background()
+	json := []byte(os.Getenv("CREDENTIALS"))
+
+	client, err := vision.NewImageAnnotatorClient(ctx, option.WithCredentialsJSON(json))
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	image, err := vision.NewImageFromReader(f)
+	if err != nil {
+		return err
+	}
+	annotations, err := client.DetectTexts(ctx, image, nil, 10)
+	if err != nil {
+		return err
+	}
+
+	if len(annotations) == 0 {
+		fmt.Println("No text found.")
+	} else {
+		fmt.Println("Text:")
+		for _, annotation := range annotations {
+			fmt.Println("%q\n", annotation.Description)
+		}
+	}
+
+	return nil
+}
+
+func checkVision() {
+	ctx := context.Background()
+
+	// Creates a client.
+	client, err := vision.NewImageAnnotatorClient(ctx)
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	// Sets the name of the image file to annotate.
+	filename := "./gojek.png"
+
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatalf("Failed to read file: %v", err)
+	}
+	defer file.Close()
+	image, err := vision.NewImageFromReader(file)
+	if err != nil {
+		log.Fatalf("Failed to create image: %v", err)
+	}
+
+	labels, err := client.DetectLabels(ctx, image, nil, 10)
+	if err != nil {
+		log.Fatalf("Failed to detect labels: %v", err)
+	}
+
+	fmt.Println("Labels:")
+	for _, label := range labels {
+		fmt.Println(label.Description)
+	}
 }
