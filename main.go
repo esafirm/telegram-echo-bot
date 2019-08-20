@@ -71,7 +71,10 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 
 	}
 
-	log.Println(data)
+	jsonString, err := json.Marshal(data)
+	if err == nil {
+		log.Println(string(jsonString))
+	}
 
 	if strings.Contains(data.Message.Text, "start") {
 		return events.APIGatewayProxyResponse{
@@ -80,6 +83,7 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	}
 
 	if data.Message.Photo != nil {
+		log.Println("Image detected!")
 		return events.APIGatewayProxyResponse{
 			StatusCode: 200,
 			Body:       "Image detected! " + data.Message.Photo[0].FileID,
