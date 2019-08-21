@@ -1,4 +1,4 @@
-module github.com/esafirm/telegram-echo-bot
+module github.com/esafirm/gosendbot
 
 go 1.12
 
