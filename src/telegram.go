@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -47,7 +48,7 @@ type GetFileResult struct {
 	} `json:"result"`
 }
 
-var TELEGRAM_BOT_TOKEN string 
+var TELEGRAM_BOT_TOKEN string = os.Getenv("TELEGRAM_BOT_TOKEN")
 
 var client = &http.Client{}
 

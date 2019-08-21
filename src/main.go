@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -68,5 +69,17 @@ func PrintJson(prefix string, data interface{}) {
 }
 
 func main() {
+	if len(os.Args) > 1 {
+		fileID := os.Args[1]
+		path, err := GetImagePath(fileID)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		DetectTextFromImage(path)
+	}
+
 	lambda.Start(handler)
 }
