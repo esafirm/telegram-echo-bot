@@ -120,6 +120,8 @@ func GetImagePath(fileID string) (string, error) {
 	result := GetFileResult{}
 	err = getJson(req, &result)
 
+	PrintJson("FileResut: ", result)
+
 	filePath = fmt.Sprintf("https://api.telegram.org/bot%s/%s", TELEGRAM_BOT_TOKEN, result.Result.FilePath)
 
 	log.Println("FilePath: " + filePath)

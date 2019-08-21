@@ -25,7 +25,7 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		}, nil
 	}
 
-	logUpdate(data)
+	PrintJson("Updates: ", data)
 
 	// Handle start command
 	if strings.Contains(data.Message.Text, "start") {
@@ -60,10 +60,10 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 
 }
 
-func logUpdate(data Data) {
+func PrintJson(prefix string, data interface{}) {
 	jsonString, err := json.Marshal(data)
 	if err == nil {
-		log.Println(string(jsonString))
+		log.Println(prefix + string(jsonString))
 	}
 }
 

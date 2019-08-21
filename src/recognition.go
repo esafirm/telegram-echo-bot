@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 
 	vision "cloud.google.com/go/vision/apiv1"
@@ -10,6 +10,8 @@ import (
 )
 
 func DetectTextFromImage(imagePath string) error {
+
+
 	ctx := context.Background()
 	json := []byte(os.Getenv("CREDENTIALS"))
 
@@ -25,11 +27,11 @@ func DetectTextFromImage(imagePath string) error {
 	}
 
 	if len(annotations) == 0 {
-		fmt.Println("No text found.")
+		log.Println("No text found.")
 	} else {
-		fmt.Println("Text:")
+		log.Println("Text:")
 		for _, annotation := range annotations {
-			fmt.Println("%q\n", annotation.Description)
+			log.Println("%q\n", annotation.Description)
 		}
 	}
 
