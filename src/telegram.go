@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -105,14 +104,11 @@ func GetImagePath(fileID string) (string, error) {
 
 	var filePath string
 
-	data := url.Values{}
-	data.Set("file_id", fileID)
+	endpoint := fmt.Sprintf("https://api.telegram.org/bot%s/getFile?file_id=%s", TELEGRAM_BOT_TOKEN, fileID)
 
-	endpoint := fmt.Sprintf("https://api.telegram.org/bot%s/getFile", TELEGRAM_BOT_TOKEN)
+	log.Println("Endpoint:" + endpoint)
 
-	log.Println(("Endpoint:" + endpoint))
-
-	req, err := http.NewRequest("POST", endpoint, bytes.NewBufferString(data.Encode()))
+	req, err := http.NewRequest("POST", endpoint, nil)
 	req.Header.Set("Content-Type", "application/json")
 
 	if err != nil {
