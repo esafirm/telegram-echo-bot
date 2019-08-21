@@ -22,16 +22,16 @@ func DetectTextFromImage(imagePath string) error {
 		return err
 	}
 
-	DownloadImage(imagePath)
+	// DownloadImage(imagePath)
 
-	f, err := os.Open("temp.jpg")
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	defer f.Close()
+	// f, err := os.Open("temp.jpg")
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return err
+	// }
+	// defer f.Close()
 
-	image, err := vision.NewImageFromReader(f)
+	image := vision.NewImageFromURI(imagePath)
 	if err != nil {
 		log.Println(err)
 		return err
