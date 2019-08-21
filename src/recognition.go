@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 
 	vision "cloud.google.com/go/vision/apiv1"
@@ -22,16 +25,22 @@ func DetectTextFromImage(imagePath string) error {
 		return err
 	}
 
-	// DownloadImage(imagePath)
+	// Download image
+	response, e := http.Get(imagePath)
+	if e != nil {
+		log.Fatal(e)
+	}
+	defer response.Body.Close()
 
-	// f, err := os.Open("temp.jpg")
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return err
-	// }
-	// defer f.Close()
+	// Create reader from HTTP respose
+	images, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	reader := bytes.NewReader(images)
 
-	image := vision.NewImageFromURI(imagePath)
+	image, err := vision.NewImageFromReader(reader)
 	if err != nil {
 		log.Println(err)
 		return err
