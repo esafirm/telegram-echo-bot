@@ -48,7 +48,7 @@ type GetFileResult struct {
 	} `json:"result"`
 }
 
-var TELEGRAM_BOT_TOKEN string
+var TELEGRAM_BOT_TOKEN string 
 
 var client = &http.Client{}
 
@@ -103,12 +103,14 @@ func SendResponse(text string, chatID string) (events.APIGatewayProxyResponse, e
 
 func GetImagePath(fileID string) (string, error) {
 
-	var filePath string 	
+	var filePath string
 
 	data := url.Values{}
 	data.Set("file_id", fileID)
 
 	endpoint := fmt.Sprintf("https://api.telegram.org/bot%s/getFile", TELEGRAM_BOT_TOKEN)
+
+	log.Println(("Endpoint:" + endpoint))
 
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBufferString(data.Encode()))
 	req.Header.Set("Content-Type", "application/json")
