@@ -10,19 +10,36 @@ import (
 )
 
 func DetectTextFromImage(imagePath string) error {
-
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.Println("Detecting text from images…")
 
 	ctx := context.Background()
 	json := []byte(os.Getenv("CREDENTIALS"))
 
 	client, err := vision.NewImageAnnotatorClient(ctx, option.WithCredentialsJSON(json))
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
-	image := vision.NewImageFromURI(imagePath)
+	DownloadImage(imagePath)
+
+	f, err := os.Open("temp.jpg")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	defer f.Close()
+
+	image, err := vision.NewImageFromReader(f)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
 	annotations, err := client.DetectTexts(ctx, image, nil, 10)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 

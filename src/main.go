@@ -69,6 +69,8 @@ func PrintJson(prefix string, data interface{}) {
 }
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	if len(os.Args) > 1 {
 		fileID := os.Args[1]
 		path, err := GetImagePath(fileID)
